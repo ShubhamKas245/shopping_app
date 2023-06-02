@@ -59,9 +59,9 @@ export const registerField = [
       if (!value) {
         return "Required...";
       }
-      if(value !== password.value){
-       return 'Confirm Password should match with password';
-      }
+      // if(value !== Password.value){
+      //  return 'Confirm Password should match with password';
+      // }
       return null;
     },
   },

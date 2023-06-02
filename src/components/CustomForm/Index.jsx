@@ -4,13 +4,16 @@ import React from "react";
 const CustomForm = ({ fields, btnProps, children, ...props }) => {
   return (
     <Formik {...props}>
-      {({ isValid, dirty, isSubmitting }) => (
-        <Form className="space-y-3" defaultValue="true">
-          
-            {fields?.map((x) => (
-              <Field key={x.name} {...x} />
-            ))}
-        
+      {({ isValid, dirty, isSubmitting, errors }) => (
+        <Form className="space-y-3">
+          {errors.serverError && (
+            <p className="text-center text-red-500 text-lg font-medium">
+              {errors.serverError}
+            </p>
+          )}
+          {fields?.map((x) => (
+            <Field key={x.name} {...x} />
+          ))}
 
           {children}
 

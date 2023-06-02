@@ -1,8 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Header from '../Haeder';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 const DashboardLayout = () => {
+  const navigate=useNavigate();
+  useEffect(()=>{
+    const token=localStorage.getItem('token');
+    if(!token){
+      navigate('/auth',{replace:true})
+    }
+  })
   return (
     <>
     <Header />

@@ -1,18 +1,31 @@
 import React from "react";
 import { RegisterInitVal, registerField } from "./RegisterFields";
 import CustomForm from "../../components/CustomForm/Index";
-
-const wait = (time) => new Promise((resolve) => setTimeout(resolve, time));
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../utils/axiosInstance";
 
 const Register = () => {
+  const navigate = useNavigate();
+
+  const register = async (values, actions) => {
+    try {
+      console.log(actions);
+      const { confirmPassword, ...rest } = values;
+      const res = await axiosInstance.post('register', rest);
+      localStorage.setItem('token',JSON.stringify(res.data))
+      actions.resetForm();
+      navigate('/', { replace: true });
+    } catch (error) {
+      actions.setErrors({
+        serverError: error.message,
+      });
+    }
+  };
   return (
     <CustomForm
       initialValues={RegisterInitVal}
       fields={registerField}
-      onSubmit={async (values) => {
-        await wait(2000);
-        console.log(values);
-      }}
+      onSubmit={register}
       btnProps={{
         children: "Sign Up",
       }}
