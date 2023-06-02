@@ -1,29 +1,14 @@
 import { Field } from "formik";
-import React from "react";
+import React, { useContext } from "react";
 import CustomForm from "../../components/CustomForm/Index";
 import { loginFields, loginInitVal } from "./LoginFields";
 import checkbox from "../../components/checkbox/Index";
-import axiosInstance from "../../utils/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { AuthContext} from "../../context/AuthContext";
 
 const Login = () => {
-  const navigate=useNavigate();
-
-  const login=async(values,actions)=>{
-    try {
-      const {rememberMe,...rest}=values;
-      const res=await axiosInstance.post('login',rest);
-      localStorage.setItem('token',JSON.stringify(res.data));
-      actions.resetForm();
-      navigate('/',{replace:true})
-      
-    } catch (error) {
-      actions.setErrors({
-        serverError:error.message,
-      })
-      
-    }
-  }
+  
+  const {login}=useContext(AuthContext)
+  
   return (
     <CustomForm
       initialValues={loginInitVal}
