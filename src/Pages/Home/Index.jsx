@@ -1,14 +1,19 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect} from "react";
 import { ProductsContext } from "../../context/ProductContext";
 import { StarIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { CartContext } from "../../context/CartContext";
+import { useLoading } from "../../context/LoadingContext";
 
 const Home = () => {
   const { loadProducts, products } = useContext(ProductsContext);
 
   const { loadCart, addToCart, updateToCart, deleteCartItem, cart } =
     useContext(CartContext);
+
+    const {loading}=useLoading();
+    console.log(loading)
+
 
   useEffect(() => {
     loadProducts();
@@ -39,13 +44,13 @@ const Home = () => {
                 {product.title}
               </h2>
 
-              <section aria-labelledby="information-heading" className="mt-2">
+              <section aria-labelledby="information-heading" className="mt-4">
                 <h3 id="information-heading">{product.description}</h3>
 
                 <p className="text-2xl text-gray-900">Rs {product.price}</p>
 
                 {/* Reviews */}
-                <div className="mt-6">
+                <div className="mt-6 mb-16">
                   <h4 className="sr-only">Reviews</h4>
                   <div className="flex items-center">
                     <div className="flex items-center">
@@ -74,7 +79,7 @@ const Home = () => {
                   </div>
                 </div>
                 {cartItem ? (
-                  <div className="flex items-center">
+                  <div className="flex items-center ">
                     <button
                       type="submit"
                       className="flex-1 items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

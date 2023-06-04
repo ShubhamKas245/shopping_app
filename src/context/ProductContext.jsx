@@ -1,34 +1,64 @@
-import React, { useCallback,createContext,useMemo,useState  } from "react";
+import React, {
+  useCallback,
+  createContext,
+  useMemo,
+  useReducer,
+  useContext,
+} from "react";
+import PropTypes from "prop-types";
 import axiosInstance from "../utils/axiosInstance";
+import {
+  ProductReducer,
+  initialProductsState,
+} from "../reducers/ProductReducers";
+import useDispatch from "../hooks/useDispatch";
 
-export const ProductsContext=createContext();
+export const ProductsContext = createContext();
 
-export const ProductsProvider=({children})=>{
-    const [products,setProducts]=useState([]);
-    const [loading,setLoading]=useState(false);
-    const [error,setError]=useState(null);
+export const ProductsProvider = ({ children }) => {
+  const [products, dispatch] = useReducer(
+    ProductReducer,
+    initialProductsState
+  );
 
-    const loadProducts=useCallback(async()=>{
-       try {
-        setLoading(true);
-        const res=await axiosInstance.get('products');
-        setProducts(res.data);
-       } catch (err) {
-        setError(err);
-       } finally {
-        setLoading(false);
-       }
-    },[])
+  const { loadDispatch, successDispatch, errDispatch } = useDispatch(dispatch);
 
-    const value=useMemo(()=>({
-        loadProducts,
-        products,
-        productsLoading:loading,
-        productsError:error,
-    }),[loadProducts,products,loading,error])
-    return (
-        <ProductsContext.Provider value={value}>
-            {children}
-        </ProductsContext.Provider>
-    )
-}
+  const loadProducts = useCallback(async () => {
+    const actionName = "LOAD_PRODUCTS";
+    try {
+      loadDispatch({
+        type: `${actionName}_REQUEST`,
+        payload: { message: "Products are loading..." },
+      });
+      const res = await axiosInstance.get("products");
+      successDispatch({
+        type: `${actionName}_SUCCESS`,
+        payload: res.data,
+      });
+    } catch (err) {
+      errDispatch({
+        type: `${actionName}_FAIL`,
+        payload: { message: err.message },
+      });
+    }
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      loadProducts,
+      products,
+    }),
+    [products]
+  );
+  return (
+    <ProductsContext.Provider value={value}>
+      {children}
+    </ProductsContext.Provider>
+  );
+};
+
+ProductsProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export const useProducts = () => useContext(ProductsContext);

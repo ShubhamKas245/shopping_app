@@ -1,64 +1,98 @@
-import React, { createContext, useCallback, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useMemo,
+  useReducer,
+} from "react";
+import PropTypes from "prop-types";
 import axiosInstance from "../utils/axiosInstance";
+import { CartReducer, initialCartState } from "../reducers/CartReducer";
+import useDispatch from "../hooks/useDispatch";
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [loading, setLoading] = useState(false);
-  const [cart, setCart] = useState([]);
-  const [error, setError] = useState(null);
+  const [cart, dispatch] = useReducer(CartReducer, initialCartState);
+
+  const { loadDispatch, successDispatch, errDispatch } = useDispatch(dispatch);
 
   const loadCart = useCallback(async () => {
+    const actionName = "LOAD_CART";
     try {
-      setLoading(true);
+      loadDispatch({
+        type: `${actionName}_REQUEST`,
+        payload: { message: "Products are loading..." },
+      });
       const res = await axiosInstance.get("cart");
-      setCart(res.data);
+      successDispatch({
+        type: `${actionName}_SUCCESS`,
+        payload: res.data,
+      });
     } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      errDispatch({
+        type: `${actionName}_FAIL`,
+        payload: { message: err.message },
+      });
     }
   }, []);
 
   const addToCart = useCallback(async (data) => {
+    const actionName = "ADD_CART";
     try {
-      setLoading(true);
+      loadDispatch({
+        type: `${actionName}_REQUEST`,
+        payload: { message: "Cart items are adding..." },
+      });
       const res = await axiosInstance.post("cart", data);
-      setCart((val) => [...val, res.data]);
+      successDispatch({
+        type: `${actionName}_SUCCESS`,
+        payload: res.data,
+      });
     } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      errDispatch({
+        type: `${actionName}_FAIL`,
+        payload: { message: err.message },
+      });
     }
   }, []);
 
   const updateToCart = useCallback(async (data) => {
+    const actionName = "UPDATE_CART";
     try {
-      setLoading(true);
+      loadDispatch({
+        type: `${actionName}_REQUEST`,
+        payload: { message: "Cart items are updating..." },
+      });
       const res = await axiosInstance.put(`cart/${data.id}`, data);
-      setCart((val) => {
-        const index = val.findIndex((x) => x.id === data.id);
-        return [...val.slice(0, index), res.data, ...val.slice(index + 1)];
+      successDispatch({
+        type: `${actionName}_SUCCESS`,
+        payload: res.data,
       });
     } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      errDispatch({
+        type: `${actionName}_FAIL`,
+        payload: { message: err.message },
+      });
     }
   }, []);
 
   const deleteCartItem = useCallback(async (data) => {
+    const actionName = "DELETE_CART";
     try {
-      setLoading(true);
+      loadDispatch({
+        type: `${actionName}_REQUEST`,
+        payload: { message: "Cart items are Deleting..." },
+      });
       await axiosInstance.delete(`cart/${data.id}`);
-      setCart((val) => {
-        const index = val.findIndex((x) => x.id === data.id);
-        return [...val.slice(0, index), ...val.slice(index + 1)];
+      successDispatch({
+        type: `${actionName}_SUCCESS`,
+        payload: data,
       });
     } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      errDispatch({
+        type: `${actionName}_FAIL`,
+        payload: { message: err.message },
+      });
     }
   }, []);
 
@@ -66,13 +100,16 @@ export const CartProvider = ({ children }) => {
     () => ({
       loadCart,
       cart,
-      cartLoading: loading,
-      cartError: error,
+      
       addToCart,
       updateToCart,
       deleteCartItem,
     }),
-    [loadCart, cart, loading, error, addToCart, updateToCart, deleteCartItem]
+    [loadCart, cart, addToCart, updateToCart, deleteCartItem]
   );
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+};
+
+CartProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
